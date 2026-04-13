@@ -168,6 +168,7 @@ function renderVoting(): void {
   state.selectedVote = null;
   state.hasVoted = false;
 
+  ($('vote-image') as HTMLImageElement).src = '/images/clock-waiting.png';
   $('vote-status').textContent = `0 / ${state.players.length} voted`;
   $('vote-submitted-msg').classList.add('hidden');
 
@@ -199,6 +200,7 @@ function renderVoting(): void {
         b.disabled = true;
         b.classList.add('submitted');
       });
+      ($('vote-image') as HTMLImageElement).src = '/images/voted.png';
       $('vote-submitted-msg').classList.remove('hidden');
       grid.classList.add('hidden');
       socket.emit('submit-vote', { votedId: state.selectedVote });
@@ -310,6 +312,8 @@ function renderResults(data: {
     $('result-imposter-name-escaped').textContent = names;
     $('result-word-escaped-correct').textContent = word;
     $('result-guess-correct-val').textContent = guess;
+    ($('result-escaped-correct-img') as HTMLImageElement).src =
+      state.myRole === 'imposter' ? '/images/excited.png' : '/images/disappointed.png';
   } else {
     $('result-escaped-wrong').classList.remove('hidden');
     $('result-imposter-name-wrong').textContent = names;

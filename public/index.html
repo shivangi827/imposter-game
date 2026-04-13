@@ -46,6 +46,7 @@
 ═══════════════════════════════════════════════════════ -->
 <div id="screen-lobby" class="screen hidden">
   <div class="container">
+    <img class="character" src="/images/clock-waiting.png" alt="" />
     <div class="room-code-banner">
       <span class="label">Room Code</span>
       <span id="lobby-code" class="code-display"></span>
@@ -84,6 +85,7 @@
 ═══════════════════════════════════════════════════════ -->
 <div id="screen-role" class="screen hidden">
   <div class="container center-content">
+    <img class="character" src="/images/dancing.png" alt="" />
     <div id="role-civilian" class="hidden">
       <p class="pre-label">The secret word is</p>
       <div class="word-reveal" id="role-word"></div>
@@ -141,6 +143,7 @@
 ═══════════════════════════════════════════════════════ -->
 <div id="screen-voting" class="screen hidden">
   <div class="container center-content">
+    <img id="vote-image" class="character" src="/images/clock-waiting.png" alt="" />
     <div class="phase-header">
       <h2>Voting Time</h2>
       <p>Who do you think is the imposter?</p>
@@ -159,6 +162,7 @@
 ═══════════════════════════════════════════════════════ -->
 <div id="screen-reveal-votes" class="screen hidden">
   <div class="container center-content">
+    <img class="character" src="/images/drumroll.png" alt="" />
     <div class="phase-header">
       <h2>The Votes Are In</h2>
     </div>
@@ -181,6 +185,7 @@
 <div id="screen-imposter-guess" class="screen hidden">
   <div class="container center-content">
     <div class="reveal-card escape-card">
+      <img class="character" src="/images/anxious.png" alt="" />
       <h2>One Final Chance</h2>
       <div id="imposter-names-escaped" class="imposter-name-display"></div>
       <p id="imposter-escaped-msg">gets one shot to guess the secret word!</p>
@@ -211,7 +216,7 @@
 
     <!-- Caught + imposter guessed wrong: clean civilian win -->
     <div id="result-caught" class="reveal-card win-card hidden">
-      <img class="character" src="/images/excited.png" alt="" />
+      <img id="result-caught-img" class="character" src="/images/dancing.png" alt="" />
       <h2>Civilians Win</h2>
       <div id="result-imposter-name-caught" class="imposter-name-display"></div>
       <p>was caught and couldn't guess the word. Civilians <strong>+1</strong>.</p>
@@ -235,7 +240,7 @@
 
     <!-- Escaped + imposter guessed right: imposter win -->
     <div id="result-escaped-correct" class="reveal-card win-card hidden">
-      <img class="character" src="/images/excited.png" alt="" />
+      <img id="result-escaped-correct-img" class="character" src="/images/excited.png" alt="" />
       <h2>Imposter Wins</h2>
       <div id="result-imposter-name-escaped" class="imposter-name-display"></div>
       <p>escaped <em>and</em> guessed the word. Imposter <strong>+1</strong>.</p>
