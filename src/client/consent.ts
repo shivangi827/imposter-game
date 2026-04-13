@@ -17,26 +17,30 @@ function markAccepted(): void {
   }
 }
 
+/**
+ * FIXED: This now properly defines AND starts the Clarity engine.
+ */
 function loadClarity(projectId: string): void {
-  if ((window as unknown as { clarity?: unknown }).clarity) return;
-  (function (
-    c: Window & { [k: string]: unknown },
-    l: Document,
-    a: string,
-    r: string,
-    i: string
-  ) {
-    c[a] =
-      c[a] ||
-      function (...args: unknown[]) {
-        ((c[a] as { q?: unknown[] }).q = (c[a] as { q?: unknown[] }).q || []).push(args);
-      };
-    const t = l.createElement(r) as HTMLScriptElement;
-    t.async = true;
-    t.src = 'https://www.clarity.ms/tag/' + i;
-    const y = l.getElementsByTagName(r)[0];
-    y?.parentNode?.insertBefore(t, y);
-  })(window as unknown as Window & { [k: string]: unknown }, document, 'clarity', 'script', projectId);
+  const win = window as any;
+  
+  // 1. If clarity is already running, don't re-initialize
+  if (win.clarity && win.clarity.q && win.clarity.q.length > 0) return;
+
+  // 2. Define the stub function and queue
+  win.clarity = win.clarity || function() {
+    (win.clarity.q = win.clarity.q || []).push(arguments);
+  };
+
+  // 3. Inject the script tag
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.clarity.ms/tag/${projectId}`;
+  const firstScript = document.getElementsByTagName('script')[0];
+  firstScript?.parentNode?.insertBefore(script, firstScript);
+
+  // 4. THE FIX: You must call these two lines to trigger the network calls!
+  win.clarity("js", new Date());
+  win.clarity("config", projectId);
 }
 
 function showModal(readOnly: boolean): void {
@@ -55,6 +59,7 @@ function hideModal(): void {
 }
 
 export function initConsent(): void {
+  // Runs immediately on load
   if (hasAccepted()) {
     loadClarity(CLARITY_PROJECT_ID);
   } else {
