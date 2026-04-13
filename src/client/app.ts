@@ -136,6 +136,13 @@ function renderLobby(): void {
 
 function renderRound(round: number): void {
   $('round-badge').textContent = `Round ${round}`;
+  const img = $('round-image') as HTMLImageElement;
+  const byRound: Record<number, string> = {
+    1: '/images/happy.png',
+    2: '/images/confused.png',
+    3: '/images/waiting.png',
+  };
+  img.src = byRound[round] ?? '/images/happy.png';
   $('round-player-list').innerHTML = state.players
     .map(
       (p) => `<div class="turn-chip pcolor-${escHtml(p.color)}">${escHtml(p.name)}</div>`

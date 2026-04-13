@@ -14,6 +14,7 @@
 <div id="screen-home" class="screen active">
   <div class="hero">
     <div class="logo">
+      <img class="character character-lg" src="/images/detective.png" alt="Detective cat mascot" />
       <h1>IMPOSTER</h1>
       <p class="tagline">The word bluffing party game</p>
     </div>
@@ -117,6 +118,7 @@
 ═══════════════════════════════════════════════════════ -->
 <div id="screen-round" class="screen hidden">
   <div class="container center-content">
+    <img id="round-image" class="character" src="/images/happy.png" alt="" />
     <div class="round-badge" id="round-badge">Round 1</div>
     <p class="round-instructions">
       Go around and each say <strong>one word</strong> that hints at the secret word.
@@ -209,6 +211,7 @@
 
     <!-- Caught + imposter guessed wrong: clean civilian win -->
     <div id="result-caught" class="reveal-card win-card hidden">
+      <img class="character" src="/images/excited.png" alt="" />
       <h2>Civilians Win</h2>
       <div id="result-imposter-name-caught" class="imposter-name-display"></div>
       <p>was caught and couldn't guess the word. Civilians <strong>+1</strong>.</p>
@@ -220,6 +223,7 @@
 
     <!-- Caught + imposter guessed right: split decision -->
     <div id="result-caught-correct" class="reveal-card hidden">
+      <img class="character" src="/images/excited.png" alt="" />
       <h2>Split Decision</h2>
       <div id="result-imposter-name-cc" class="imposter-name-display"></div>
       <p>was caught — but redeemed by guessing the word. <strong>Both teams +1</strong>.</p>
@@ -231,6 +235,7 @@
 
     <!-- Escaped + imposter guessed right: imposter win -->
     <div id="result-escaped-correct" class="reveal-card win-card hidden">
+      <img class="character" src="/images/excited.png" alt="" />
       <h2>Imposter Wins</h2>
       <div id="result-imposter-name-escaped" class="imposter-name-display"></div>
       <p>escaped <em>and</em> guessed the word. Imposter <strong>+1</strong>.</p>
@@ -242,6 +247,7 @@
 
     <!-- Escaped + imposter guessed wrong: nobody scores -->
     <div id="result-escaped-wrong" class="reveal-card lose-card hidden">
+      <img class="character" src="/images/sad.png" alt="" />
       <h2>Close, but no</h2>
       <div id="result-imposter-name-wrong" class="imposter-name-display"></div>
       <p>escaped but couldn't guess the word. Nobody scores this round.</p>

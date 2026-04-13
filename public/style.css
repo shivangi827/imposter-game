@@ -43,6 +43,33 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════
+   CHARACTER IMAGES
+═══════════════════════════════════════════════════════ */
+.character {
+  display: block;
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
+  margin: 0 auto 1rem;
+  border-radius: 18px;
+  filter: drop-shadow(0 6px 14px rgba(255, 128, 128, 0.22));
+}
+.character-lg {
+  width: 180px;
+  height: 180px;
+  margin-bottom: 0.25rem;
+}
+.reveal-card .character {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 0.5rem;
+}
+@media (max-width: 400px) {
+  .character    { width: 110px; height: 110px; }
+  .character-lg { width: 140px; height: 140px; }
+}
+
+/* ═══════════════════════════════════════════════════════
    PLAYER PASTEL COLORS
 ═══════════════════════════════════════════════════════ */
 .pcolor-blue   { --pc-bg:#a5d8ff; --pc-fg:#0f3a5e; --pc-soft:#dcefff; }
