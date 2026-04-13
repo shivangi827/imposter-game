@@ -182,10 +182,10 @@
 <div id="screen-imposter-guess" class="screen hidden">
   <div class="container center-content">
     <div class="reveal-card escape-card">
-      <div class="reveal-icon">😏</div>
-      <h2>The Imposter Escaped!</h2>
+      <div class="reveal-icon">🎯</div>
+      <h2>One Final Chance</h2>
       <div id="imposter-names-escaped" class="imposter-name-display"></div>
-      <p id="imposter-escaped-msg">slipped through! Can they guess the secret word?</p>
+      <p id="imposter-escaped-msg">gets one shot to guess the secret word!</p>
     </div>
 
     <!-- Shown only to imposter -->
@@ -211,37 +211,52 @@
 <div id="screen-results" class="screen hidden">
   <div class="container center-content">
 
-    <!-- Caught outcome -->
+    <!-- Caught + imposter guessed wrong: clean civilian win -->
     <div id="result-caught" class="reveal-card win-card hidden">
       <div class="reveal-icon">🎉</div>
       <h2>Civilians Win!</h2>
       <div id="result-imposter-name-caught" class="imposter-name-display"></div>
-      <p>was the imposter! Each civilian gets <strong>+1 point</strong>.</p>
+      <p>was caught and couldn't guess the word. Civilians <strong>+1</strong>.</p>
+      <div class="guess-result-chip wrong">
+        Imposter guessed: <strong id="result-guess-caught-val"></strong> ✗
+      </div>
       <div class="word-chip">The word was: <strong id="result-word-caught"></strong></div>
     </div>
 
-    <!-- Escaped outcome -->
-    <div id="result-escaped" class="hidden">
-      <div id="result-escaped-correct" class="reveal-card win-card hidden">
-        <div class="reveal-icon">🤣</div>
-        <h2>Imposter Wins!</h2>
-        <div id="result-imposter-name-escaped" class="imposter-name-display"></div>
-        <p>escaped and correctly guessed the word!</p>
-        <div class="guess-result-chip correct">
-          Guessed: <strong id="result-guess-correct-val"></strong> ✓
-        </div>
-        <div class="word-chip">The word was: <strong id="result-word-escaped-correct"></strong></div>
+    <!-- Caught + imposter guessed right: split decision -->
+    <div id="result-caught-correct" class="reveal-card hidden">
+      <div class="reveal-icon">🤝</div>
+      <h2>Split Decision!</h2>
+      <div id="result-imposter-name-cc" class="imposter-name-display"></div>
+      <p>was caught — but redeemed by guessing the word. <strong>Both teams +1</strong>.</p>
+      <div class="guess-result-chip correct">
+        Imposter guessed: <strong id="result-guess-cc-val"></strong> ✓
       </div>
-      <div id="result-escaped-wrong" class="reveal-card lose-card hidden">
-        <div class="reveal-icon">😅</div>
-        <h2>Close, but no!</h2>
-        <div id="result-imposter-name-wrong" class="imposter-name-display"></div>
-        <p>escaped but couldn't guess the word.</p>
-        <div class="guess-result-chip wrong">
-          Guessed: <strong id="result-guess-wrong-val"></strong> ✗
-        </div>
-        <div class="word-chip">The word was: <strong id="result-word-escaped-wrong"></strong></div>
+      <div class="word-chip">The word was: <strong id="result-word-cc"></strong></div>
+    </div>
+
+    <!-- Escaped + imposter guessed right: imposter win -->
+    <div id="result-escaped-correct" class="reveal-card win-card hidden">
+      <div class="reveal-icon">🤣</div>
+      <h2>Imposter Wins!</h2>
+      <div id="result-imposter-name-escaped" class="imposter-name-display"></div>
+      <p>escaped <em>and</em> guessed the word. Imposter <strong>+1</strong>.</p>
+      <div class="guess-result-chip correct">
+        Guessed: <strong id="result-guess-correct-val"></strong> ✓
       </div>
+      <div class="word-chip">The word was: <strong id="result-word-escaped-correct"></strong></div>
+    </div>
+
+    <!-- Escaped + imposter guessed wrong: nobody scores -->
+    <div id="result-escaped-wrong" class="reveal-card lose-card hidden">
+      <div class="reveal-icon">😅</div>
+      <h2>Close, but no!</h2>
+      <div id="result-imposter-name-wrong" class="imposter-name-display"></div>
+      <p>escaped but couldn't guess the word. Nobody scores this round.</p>
+      <div class="guess-result-chip wrong">
+        Guessed: <strong id="result-guess-wrong-val"></strong> ✗
+      </div>
+      <div class="word-chip">The word was: <strong id="result-word-escaped-wrong"></strong></div>
     </div>
 
     <!-- Scoreboard -->

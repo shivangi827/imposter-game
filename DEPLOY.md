@@ -1,5 +1,10 @@
 # Deploying the Imposter Game
 
+The recommended host is **Render Free** (see below). Fly.io configs are kept
+in the repo as a fallback but Fly's "trial" turned out to be very short and a
+single forgotten browser tab keeps the websocket open and the VM awake, so it
+is not a good fit for a low-traffic game on a free budget.
+
 ## Local dev
 
 ```bash
@@ -16,7 +21,36 @@ npm run build
 npm start
 ```
 
-## Fly.io deploy
+## Render Free (recommended)
+
+Render's free web service tier supports Docker, supports WebSockets, and
+requires no credit card. The instance sleeps after 15 minutes of inactivity
+and cold-starts in ~30–60 seconds on the next request — fine for a friends-
+only party game where the first player to arrive can wait briefly.
+
+**Setup (one time):**
+
+1. Sign up at https://render.com using your GitHub account.
+2. Click **New +** → **Web Service**.
+3. Connect the `shivangi827/imposter-game` repo.
+4. Render auto-detects `render.yaml`. Confirm:
+   - Plan: **Free**
+   - Runtime: **Docker** (uses our `Dockerfile`)
+   - Branch: **main**
+5. Click **Create Web Service**. First build takes ~5 minutes.
+
+Your app lives at `https://imposter-game.onrender.com` (or whatever name
+Render assigns).
+
+**Behavior:**
+- Active games keep the instance warm (the websocket counts as activity).
+- After 15 min with no connections AND no rooms, instance sleeps.
+- The server's own idle reaper kicks rooms after 15 min of inactivity, so
+  forgotten browser tabs cannot keep the instance awake forever.
+
+**Re-deploys:** every push to `main` triggers an auto-deploy.
+
+## Fly.io deploy (fallback, not recommended for free use)
 
 **One-time setup:**
 

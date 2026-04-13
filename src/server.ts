@@ -37,6 +37,8 @@ interface Room {
   imposterId: string | null;
   imposterIds: string[];
   settings: RoomSettings;
+  lastCaught: boolean;
+  lastActivityAt: number;
 }
 
 interface SocketData {
@@ -149,6 +151,10 @@ function sanitizeCode(raw: unknown): string | null {
   return upper;
 }
 
+function touch(room: Room): void {
+  room.lastActivityAt = Date.now();
+}
+
 function getMostVotedId(players: Player[]): { mostVotedId: string | null; tie: boolean } {
   const counts: Record<string, number> = {};
   for (const p of players) {
@@ -225,6 +231,8 @@ io.on('connection', (socket: GameSocket) => {
       imposterId: null,
       imposterIds: [],
       settings: { numImposters },
+      lastCaught: false,
+      lastActivityAt: Date.now(),
     };
     rooms.set(code, room);
 
@@ -283,6 +291,7 @@ io.on('connection', (socket: GameSocket) => {
       settings: room.settings,
     });
 
+    touch(room);
     socket.to(room.code).emit('player-joined', {
       players: room.players.map(safePlayer),
       hostId: room.hostId,
@@ -293,6 +302,7 @@ io.on('connection', (socket: GameSocket) => {
     if (!checkEventRate(socket)) return;
     const room = socket.data.roomCode ? rooms.get(socket.data.roomCode) : null;
     if (!room || room.hostId !== socket.id || room.state !== 'lobby') return;
+    touch(room);
     room.settings.numImposters = Math.max(1, Math.min(3, Number(numImposters) || 1));
     io.to(room.code).emit('settings-updated', { settings: room.settings });
   });
@@ -301,6 +311,7 @@ io.on('connection', (socket: GameSocket) => {
     if (!checkEventRate(socket)) return;
     const room = socket.data.roomCode ? rooms.get(socket.data.roomCode) : null;
     if (!room || room.hostId !== socket.id) return;
+    touch(room);
     if (room.players.length < MIN_PLAYERS_TO_START) {
       socket.emit('error-msg', { message: `Need at least ${MIN_PLAYERS_TO_START} players to start.` });
       return;
@@ -352,6 +363,7 @@ io.on('connection', (socket: GameSocket) => {
     if (!checkEventRate(socket)) return;
     const room = socket.data.roomCode ? rooms.get(socket.data.roomCode) : null;
     if (!room || room.hostId !== socket.id) return;
+    touch(room);
 
     if (room.state === 'role_reveal') {
       room.round = 1;
@@ -386,6 +398,7 @@ io.on('connection', (socket: GameSocket) => {
     if (typeof votedId !== 'string') return;
     const room = socket.data.roomCode ? rooms.get(socket.data.roomCode) : null;
     if (!room || room.state !== 'voting') return;
+    touch(room);
     const player = room.players.find((p) => p.id === socket.id);
     if (!player || player.vote !== null) return;
     if (votedId === socket.id) return;
@@ -420,47 +433,30 @@ io.on('connection', (socket: GameSocket) => {
     if (!checkEventRate(socket)) return;
     const room = socket.data.roomCode ? rooms.get(socket.data.roomCode) : null;
     if (!room || room.hostId !== socket.id) return;
+    touch(room);
 
     const { mostVotedId, tie } = getMostVotedId(room.players);
-    const imposterCaught = !tie && !!mostVotedId && room.imposterIds.includes(mostVotedId);
+    const caught = !tie && !!mostVotedId && room.imposterIds.includes(mostVotedId);
+    room.lastCaught = caught;
 
     const imposterNames = room.players.filter((p) => p.isImposter).map((p) => p.name);
 
-    if (imposterCaught) {
-      room.players.forEach((p) => {
-        if (!p.isImposter) p.score++;
-      });
-      room.state = 'results';
+    // Imposter always gets a chance to guess.
+    room.state = 'imposter_guess';
+    io.to(room.code).emit('game-state', {
+      state: 'imposter_guess',
+      hostId: room.hostId,
+      imposterCaught: caught,
+      imposterIds: room.imposterIds,
+      imposterNames,
+      word: null,
+      players: room.players.map(safePlayer),
+    });
 
-      io.to(room.code).emit('game-state', {
-        state: 'results',
-        hostId: room.hostId,
-        imposterCaught: true,
-        imposterIds: room.imposterIds,
-        imposterNames,
-        word: room.word,
-        imposterGuessCorrect: null,
-        imposterGuess: null,
-        players: room.players.map(safePlayer),
-      });
-    } else {
-      room.state = 'imposter_guess';
-
-      io.to(room.code).emit('game-state', {
-        state: 'imposter_guess',
-        hostId: room.hostId,
-        imposterCaught: false,
-        imposterIds: room.imposterIds,
-        imposterNames,
-        word: null,
-        players: room.players.map(safePlayer),
-      });
-
-      if (room.imposterId) {
-        const imposterSock = io.sockets.sockets.get(room.imposterId) as GameSocket | undefined;
-        if (imposterSock && room.hint) {
-          imposterSock.emit('imposter-guess-prompt', { hint: room.hint });
-        }
+    if (room.imposterId) {
+      const imposterSock = io.sockets.sockets.get(room.imposterId) as GameSocket | undefined;
+      if (imposterSock && room.hint) {
+        imposterSock.emit('imposter-guess-prompt', { hint: room.hint });
       }
     }
   });
@@ -472,9 +468,18 @@ io.on('connection', (socket: GameSocket) => {
     if (!room || room.state !== 'imposter_guess') return;
     if (!room.imposterIds.includes(socket.id)) return;
     if (!room.word) return;
+    touch(room);
 
     const trimmed = guess.trim();
     const correct = trimmed.toLowerCase() === room.word.toLowerCase();
+
+    // Civilians score if they caught the imposter, regardless of the guess.
+    if (room.lastCaught) {
+      room.players.forEach((p) => {
+        if (!p.isImposter) p.score++;
+      });
+    }
+    // Imposter scores if they guessed the word, regardless of being caught.
     if (correct) {
       const imp = room.players.find((p) => p.id === socket.id);
       if (imp) imp.score++;
@@ -486,7 +491,7 @@ io.on('connection', (socket: GameSocket) => {
     io.to(room.code).emit('game-state', {
       state: 'results',
       hostId: room.hostId,
-      imposterCaught: false,
+      imposterCaught: room.lastCaught,
       imposterIds: room.imposterIds,
       imposterNames,
       word: room.word,
@@ -500,6 +505,7 @@ io.on('connection', (socket: GameSocket) => {
     if (!checkEventRate(socket)) return;
     const room = socket.data.roomCode ? rooms.get(socket.data.roomCode) : null;
     if (!room || room.hostId !== socket.id) return;
+    touch(room);
 
     room.state = 'lobby';
     room.round = 0;
@@ -507,6 +513,7 @@ io.on('connection', (socket: GameSocket) => {
     room.hint = null;
     room.imposterId = null;
     room.imposterIds = [];
+    room.lastCaught = false;
     room.players.forEach((p) => {
       p.vote = null;
       p.isImposter = false;
@@ -543,6 +550,25 @@ io.on('connection', (socket: GameSocket) => {
     });
   });
 });
+
+// ─── Idle Room Reaper ─────────────────────────────────────────────────────────
+// If a room sits in lobby/results with no events for ROOM_IDLE_TIMEOUT_MS, kick
+// the sockets and delete it. Without this, a single forgotten browser tab keeps
+// a websocket open indefinitely, which prevents the host platform from sleeping
+// the VM and silently runs up cost.
+const ROOM_IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+const IDLE_CHECK_INTERVAL_MS = 60 * 1000;
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [code, room] of rooms.entries()) {
+    if (room.state !== 'lobby' && room.state !== 'results') continue;
+    if (now - room.lastActivityAt <= ROOM_IDLE_TIMEOUT_MS) continue;
+    io.in(code).disconnectSockets(true);
+    rooms.delete(code);
+    console.log(`Reaped idle room ${code}`);
+  }
+}, IDLE_CHECK_INTERVAL_MS).unref();
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = Number(process.env.PORT) || 3000;

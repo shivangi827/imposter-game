@@ -229,6 +229,10 @@ function renderImposterGuess(data: {
   $('guess-form').classList.toggle('hidden', !isImposter);
   $('guess-waiting').classList.toggle('hidden', isImposter);
 
+  // Re-enable the submit button — it gets disabled after a guess in the
+  // previous round and would otherwise stay disabled forever.
+  ($('btn-submit-guess') as HTMLButtonElement).disabled = false;
+
   if (isImposter) {
     $('guess-hint').textContent = state.myHint;
     const input = $('input-guess') as HTMLInputElement;
@@ -264,30 +268,42 @@ function renderResults(data: {
     )
     .join('');
 
-  $('result-caught').classList.add('hidden');
-  $('result-escaped').classList.add('hidden');
-  $('result-escaped-correct').classList.add('hidden');
-  $('result-escaped-wrong').classList.add('hidden');
+  // Hide every outcome card; the matching one is revealed below.
+  for (const id of [
+    'result-caught',
+    'result-caught-correct',
+    'result-escaped-correct',
+    'result-escaped-wrong',
+  ]) {
+    $(id).classList.add('hidden');
+  }
 
   const names = (data.imposterNames ?? []).join(' & ');
+  const word = data.word ?? '';
+  const guess = data.imposterGuess ?? '';
+  const caught = !!data.imposterCaught;
+  const correct = !!data.imposterGuessCorrect;
 
-  if (data.imposterCaught) {
+  if (caught && !correct) {
     $('result-caught').classList.remove('hidden');
     $('result-imposter-name-caught').textContent = names;
-    $('result-word-caught').textContent = data.word ?? '';
+    $('result-word-caught').textContent = word;
+    $('result-guess-caught-val').textContent = guess;
+  } else if (caught && correct) {
+    $('result-caught-correct').classList.remove('hidden');
+    $('result-imposter-name-cc').textContent = names;
+    $('result-word-cc').textContent = word;
+    $('result-guess-cc-val').textContent = guess;
+  } else if (!caught && correct) {
+    $('result-escaped-correct').classList.remove('hidden');
+    $('result-imposter-name-escaped').textContent = names;
+    $('result-word-escaped-correct').textContent = word;
+    $('result-guess-correct-val').textContent = guess;
   } else {
-    $('result-escaped').classList.remove('hidden');
-    if (data.imposterGuessCorrect) {
-      $('result-escaped-correct').classList.remove('hidden');
-      $('result-imposter-name-escaped').textContent = names;
-      $('result-word-escaped-correct').textContent = data.word ?? '';
-      $('result-guess-correct-val').textContent = data.imposterGuess ?? '';
-    } else {
-      $('result-escaped-wrong').classList.remove('hidden');
-      $('result-imposter-name-wrong').textContent = names;
-      $('result-word-escaped-wrong').textContent = data.word ?? '';
-      $('result-guess-wrong-val').textContent = data.imposterGuess ?? '';
-    }
+    $('result-escaped-wrong').classList.remove('hidden');
+    $('result-imposter-name-wrong').textContent = names;
+    $('result-word-escaped-wrong').textContent = word;
+    $('result-guess-wrong-val').textContent = guess;
   }
 
   const isHost = state.myId === state.hostId;
@@ -348,6 +364,13 @@ socket.on('game-state', (data) => {
 
   switch (data.state) {
     case 'lobby':
+      // Reset per-game state so a "Play Again" gives a clean slate.
+      state.myRole = null;
+      state.myWord = null;
+      state.myHint = null;
+      state.round = 0;
+      state.selectedVote = null;
+      state.hasVoted = false;
       renderLobby();
       showScreen('lobby');
       break;
@@ -517,7 +540,13 @@ $('input-guess').addEventListener('keydown', (e) => {
 });
 
 $('btn-play-again').addEventListener('click', () => {
+  const btn = $('btn-play-again') as HTMLButtonElement;
+  btn.disabled = true;
   socket.emit('play-again');
+  // Re-enable shortly so the user can retry if the round-trip is slow or fails.
+  setTimeout(() => {
+    btn.disabled = false;
+  }, 2000);
 });
 
 showScreen('home');
