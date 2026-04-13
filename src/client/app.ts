@@ -82,8 +82,10 @@ function setError(msg: string): void {
   }
 }
 
-function playerAvatar(name: string): string {
-  return `<div class="player-avatar">${escHtml(name.charAt(0).toUpperCase())}</div>`;
+function playerAvatar(p: { name: string; color: string }): string {
+  return `<div class="player-avatar pcolor-${escHtml(p.color)}">${escHtml(
+    p.name.charAt(0).toUpperCase()
+  )}</div>`;
 }
 
 function rankClass(i: number): string {
@@ -108,10 +110,10 @@ function renderLobby(): void {
     .map(
       (p) => `
     <li>
-      ${playerAvatar(p.name)}
+      ${playerAvatar(p)}
       <span class="player-name">${escHtml(p.name)}</span>
       ${p.id === state.hostId ? '<span class="host-badge">HOST</span>' : ''}
-      ${p.id === state.myId ? '<span style="color:var(--cyan);font-size:0.8rem">(you)</span>' : ''}
+      ${p.id === state.myId ? '<span class="you-tag">(you)</span>' : ''}
     </li>
   `
     )
@@ -135,7 +137,9 @@ function renderLobby(): void {
 function renderRound(round: number): void {
   $('round-badge').textContent = `Round ${round}`;
   $('round-player-list').innerHTML = state.players
-    .map((p) => `<div class="turn-chip">${escHtml(p.name)}</div>`)
+    .map(
+      (p) => `<div class="turn-chip pcolor-${escHtml(p.color)}">${escHtml(p.name)}</div>`
+    )
     .join('');
 
   const isHost = state.myId === state.hostId;
@@ -167,7 +171,7 @@ function renderVoting(): void {
     .map(
       (p) => `
       <button class="vote-btn" data-id="${escHtml(p.id)}">
-        ${playerAvatar(p.name)}
+        ${playerAvatar(p)}
         <span>${escHtml(p.name)}</span>
       </button>
     `
@@ -259,7 +263,7 @@ function renderResults(data: {
       (p, i) => `
     <li>
       <div class="score-rank ${rankClass(i)}">${i + 1}</div>
-      ${playerAvatar(p.name)}
+      ${playerAvatar(p)}
       <span class="score-name">${escHtml(p.name)}</span>
       ${imposterSet.has(p.id) ? '<span class="score-imp-tag">imposter</span>' : ''}
       <span class="score-pts">${p.score} pt${p.score !== 1 ? 's' : ''}</span>

@@ -8,6 +8,8 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
   PublicPlayer,
+  PlayerColor,
+  PLAYER_COLOR_PALETTE,
   RoomSettings,
   GameStateName,
   MAX_PLAYERS_PER_ROOM,
@@ -24,6 +26,7 @@ interface Player {
   score: number;
   vote: string | null;
   isImposter: boolean;
+  color: PlayerColor;
 }
 
 interface Room {
@@ -134,7 +137,14 @@ function generateRoomCode(): string {
 }
 
 function safePlayer(p: Player): PublicPlayer {
-  return { id: p.id, name: p.name, score: p.score };
+  return { id: p.id, name: p.name, score: p.score, color: p.color };
+}
+
+function pickColor(taken: Set<PlayerColor>): PlayerColor {
+  for (const c of PLAYER_COLOR_PALETTE) {
+    if (!taken.has(c)) return c;
+  }
+  return PLAYER_COLOR_PALETTE[0]!;
 }
 
 function sanitizeName(raw: unknown): string | null {
@@ -222,6 +232,7 @@ io.on('connection', (socket: GameSocket) => {
           score: 0,
           vote: null,
           isImposter: false,
+          color: PLAYER_COLOR_PALETTE[0]!,
         },
       ],
       state: 'lobby',
@@ -278,7 +289,9 @@ io.on('connection', (socket: GameSocket) => {
       return;
     }
 
-    room.players.push({ id: socket.id, name, score: 0, vote: null, isImposter: false });
+    const taken = new Set(room.players.map((p) => p.color));
+    const color = pickColor(taken);
+    room.players.push({ id: socket.id, name, score: 0, vote: null, isImposter: false, color });
     socket.join(room.code);
     socket.data.roomCode = room.code;
 

@@ -14,7 +14,6 @@
 <div id="screen-home" class="screen active">
   <div class="hero">
     <div class="logo">
-      <span class="logo-icon">🕵️</span>
       <h1>IMPOSTER</h1>
       <p class="tagline">The word bluffing party game</p>
     </div>
@@ -93,7 +92,7 @@
       </p>
     </div>
     <div id="role-imposter" class="hidden">
-      <div class="imposter-badge">🕵️ YOU ARE THE IMPOSTER</div>
+      <div class="imposter-badge">YOU ARE THE IMPOSTER</div>
       <p class="pre-label" style="margin-top:1.5rem">Your category hint</p>
       <div class="hint-reveal" id="role-hint"></div>
       <p class="role-instructions">
@@ -141,8 +140,7 @@
 <div id="screen-voting" class="screen hidden">
   <div class="container center-content">
     <div class="phase-header">
-      <span class="phase-icon">🗳️</span>
-      <h2>Voting Time!</h2>
+      <h2>Voting Time</h2>
       <p>Who do you think is the imposter?</p>
     </div>
     <div class="vote-status" id="vote-status">0 / 0 voted</div>
@@ -160,7 +158,6 @@
 <div id="screen-reveal-votes" class="screen hidden">
   <div class="container center-content">
     <div class="phase-header">
-      <span class="phase-icon">👀</span>
       <h2>The Votes Are In</h2>
     </div>
     <div id="votes-table" class="votes-table"></div>
@@ -182,7 +179,6 @@
 <div id="screen-imposter-guess" class="screen hidden">
   <div class="container center-content">
     <div class="reveal-card escape-card">
-      <div class="reveal-icon">🎯</div>
       <h2>One Final Chance</h2>
       <div id="imposter-names-escaped" class="imposter-name-display"></div>
       <p id="imposter-escaped-msg">gets one shot to guess the secret word!</p>
@@ -213,8 +209,7 @@
 
     <!-- Caught + imposter guessed wrong: clean civilian win -->
     <div id="result-caught" class="reveal-card win-card hidden">
-      <div class="reveal-icon">🎉</div>
-      <h2>Civilians Win!</h2>
+      <h2>Civilians Win</h2>
       <div id="result-imposter-name-caught" class="imposter-name-display"></div>
       <p>was caught and couldn't guess the word. Civilians <strong>+1</strong>.</p>
       <div class="guess-result-chip wrong">
@@ -225,8 +220,7 @@
 
     <!-- Caught + imposter guessed right: split decision -->
     <div id="result-caught-correct" class="reveal-card hidden">
-      <div class="reveal-icon">🤝</div>
-      <h2>Split Decision!</h2>
+      <h2>Split Decision</h2>
       <div id="result-imposter-name-cc" class="imposter-name-display"></div>
       <p>was caught — but redeemed by guessing the word. <strong>Both teams +1</strong>.</p>
       <div class="guess-result-chip correct">
@@ -237,8 +231,7 @@
 
     <!-- Escaped + imposter guessed right: imposter win -->
     <div id="result-escaped-correct" class="reveal-card win-card hidden">
-      <div class="reveal-icon">🤣</div>
-      <h2>Imposter Wins!</h2>
+      <h2>Imposter Wins</h2>
       <div id="result-imposter-name-escaped" class="imposter-name-display"></div>
       <p>escaped <em>and</em> guessed the word. Imposter <strong>+1</strong>.</p>
       <div class="guess-result-chip correct">
@@ -249,8 +242,7 @@
 
     <!-- Escaped + imposter guessed wrong: nobody scores -->
     <div id="result-escaped-wrong" class="reveal-card lose-card hidden">
-      <div class="reveal-icon">😅</div>
-      <h2>Close, but no!</h2>
+      <h2>Close, but no</h2>
       <div id="result-imposter-name-wrong" class="imposter-name-display"></div>
       <p>escaped but couldn't guess the word. Nobody scores this round.</p>
       <div class="guess-result-chip wrong">

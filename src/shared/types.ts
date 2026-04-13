@@ -7,10 +7,32 @@ export type GameStateName =
   | 'imposter_guess'
   | 'results';
 
+export type PlayerColor =
+  | 'blue'
+  | 'red'
+  | 'orange'
+  | 'purple'
+  | 'pink'
+  | 'green'
+  | 'yellow'
+  | 'teal';
+
+export const PLAYER_COLOR_PALETTE: PlayerColor[] = [
+  'blue',
+  'red',
+  'orange',
+  'purple',
+  'pink',
+  'green',
+  'yellow',
+  'teal',
+];
+
 export interface PublicPlayer {
   id: string;
   name: string;
   score: number;
+  color: PlayerColor;
 }
 
 export interface RoomSettings {
