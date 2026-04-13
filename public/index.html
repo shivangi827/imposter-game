@@ -267,16 +267,23 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════════
-     COOKIE CONSENT BANNER
+     TERMS & CONDITIONS MODAL
 ═══════════════════════════════════════════════════════ -->
-<div id="consent-banner" class="consent-banner hidden" role="dialog" aria-live="polite" aria-label="Cookie consent">
-  <div class="consent-text">
-    <strong>We use cookies</strong>
-    <p>This site uses Microsoft Clarity to understand how players use the game (anonymous session replays and heatmaps). You can accept or reject — the game works either way.</p>
-  </div>
-  <div class="consent-actions">
-    <button class="btn btn-ghost btn-sm" id="consent-reject">Reject</button>
-    <button class="btn btn-primary btn-sm" id="consent-accept">Accept</button>
+<div id="modal-terms" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-terms-title">
+  <div class="modal-box terms-box">
+    <h2 id="modal-terms-title">Terms of Use</h2>
+    <div class="terms-body">
+      <p>Imposter is a free party game. By using it, you agree to the following:</p>
+      <ul>
+        <li>This site uses <strong>Microsoft Clarity</strong> to collect anonymous analytics and session replays (page views, clicks, mouse movement, navigation). Clarity sets cookies in your browser.</li>
+        <li>We do not sell your data or share it outside of Clarity.</li>
+        <li>Names you enter in rooms are visible to other players in the same room until the room is closed.</li>
+        <li>The game is provided as-is with no warranty.</li>
+        <li>Don't use the site to harass others or abuse the service.</li>
+      </ul>
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-terms-accept">I Agree &amp; Play</button>
+    <button class="btn btn-secondary btn-full hidden" id="btn-terms-close">Close</button>
   </div>
 </div>
 
@@ -284,7 +291,7 @@
      FOOTER
 ═══════════════════════════════════════════════════════ -->
 <footer class="site-footer">
-  <a href="#" id="footer-cookie-settings">Cookie settings</a>
+  <a href="#" id="footer-terms">Terms</a>
 </footer>
 
 <script src="/app.js"></script>

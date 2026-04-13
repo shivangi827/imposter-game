@@ -1,20 +1,17 @@
-const CONSENT_KEY = 'imposter.consent.v1';
+const TERMS_KEY = 'imposter.terms.v1';
 const CLARITY_PROJECT_ID = 'watan966kt';
 
-type ConsentValue = 'accepted' | 'rejected';
-
-function readConsent(): ConsentValue | null {
+function hasAccepted(): boolean {
   try {
-    const v = localStorage.getItem(CONSENT_KEY);
-    return v === 'accepted' || v === 'rejected' ? v : null;
+    return localStorage.getItem(TERMS_KEY) === 'accepted';
   } catch {
-    return null;
+    return false;
   }
 }
 
-function writeConsent(v: ConsentValue): void {
+function markAccepted(): void {
   try {
-    localStorage.setItem(CONSENT_KEY, v);
+    localStorage.setItem(TERMS_KEY, 'accepted');
   } catch {
     /* ignore */
   }
@@ -42,59 +39,40 @@ function loadClarity(projectId: string): void {
   })(window as unknown as Window & { [k: string]: unknown }, document, 'clarity', 'script', projectId);
 }
 
-function respectsDNT(): boolean {
-  const dnt =
-    navigator.doNotTrack ||
-    (window as unknown as { doNotTrack?: string }).doNotTrack ||
-    (navigator as unknown as { msDoNotTrack?: string }).msDoNotTrack;
-  return dnt === '1' || dnt === 'yes';
+function showModal(readOnly: boolean): void {
+  const modal = document.getElementById('modal-terms');
+  const agree = document.getElementById('btn-terms-accept');
+  const close = document.getElementById('btn-terms-close');
+  if (!modal || !agree || !close) return;
+  modal.classList.remove('hidden');
+  agree.classList.toggle('hidden', readOnly);
+  close.classList.toggle('hidden', !readOnly);
 }
 
-function showBanner(): void {
-  const banner = document.getElementById('consent-banner');
-  if (banner) banner.classList.remove('hidden');
-}
-
-function hideBanner(): void {
-  const banner = document.getElementById('consent-banner');
-  if (banner) banner.classList.add('hidden');
+function hideModal(): void {
+  const modal = document.getElementById('modal-terms');
+  if (modal) modal.classList.add('hidden');
 }
 
 export function initConsent(): void {
-  const existing = readConsent();
-
-  if (respectsDNT() && existing === null) {
-    writeConsent('rejected');
-    return;
-  }
-
-  if (existing === 'accepted') {
+  if (hasAccepted()) {
     loadClarity(CLARITY_PROJECT_ID);
-    return;
-  }
-  if (existing === 'rejected') {
-    return;
+  } else {
+    showModal(false);
   }
 
-  showBanner();
-
-  document.getElementById('consent-accept')?.addEventListener('click', () => {
-    writeConsent('accepted');
-    hideBanner();
+  document.getElementById('btn-terms-accept')?.addEventListener('click', () => {
+    markAccepted();
+    hideModal();
     loadClarity(CLARITY_PROJECT_ID);
   });
-  document.getElementById('consent-reject')?.addEventListener('click', () => {
-    writeConsent('rejected');
-    hideBanner();
+
+  document.getElementById('btn-terms-close')?.addEventListener('click', () => {
+    hideModal();
   });
 
-  document.getElementById('footer-cookie-settings')?.addEventListener('click', (e) => {
+  document.getElementById('footer-terms')?.addEventListener('click', (e) => {
     e.preventDefault();
-    showBanner();
+    showModal(hasAccepted());
   });
 }
-
-document.getElementById('footer-cookie-settings')?.addEventListener('click', (e) => {
-  e.preventDefault();
-  showBanner();
-});
