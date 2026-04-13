@@ -21,22 +21,24 @@ npm start
 **One-time setup:**
 
 1. Install flyctl: `brew install flyctl`
-2. `fly auth signup` (or `fly auth login`)
-3. **Set a spend cap before first deploy.** Go to https://fly.io/dashboard → your org → Billing → Spend Management. Set a hard limit (recommend **$5/month**). Fly will stop machines rather than bill past this — it's the kill switch against surprise bills.
-4. In the project dir: `fly launch --no-deploy --copy-config --name imposter-game`
-   - This reads the existing `fly.toml` instead of generating a new one.
-5. Deploy: `fly deploy`
+2. `fly auth signup` (or `fly auth login`). The signup includes a free trial — no card required for the trial window.
+3. In the project dir: `fly launch --no-deploy --copy-config` — reads the existing `fly.toml`.
+4. Deploy: `fly deploy`
 
-Your app lives at https://imposter-game.fly.dev.
+The app URL is printed by `fly deploy` (something like `https://<app-name>.fly.dev`).
 
-## Cost controls baked in
+## Cost controls
 
-- `auto_stop_machines = "stop"` + `min_machines_running = 0` — VM sleeps when idle, $0 while sleeping.
-- Single region, single `shared-cpu-1x` 256 MB machine — no autoscaling, no multi-region multiplier.
-- HTTP rate limit: 120 req/min per IP (`express-rate-limit`).
-- Socket.IO: 8 concurrent connections per IP max, 15 events/sec per socket, 4KB max payload.
-- Cap of 500 rooms and 8 players per room.
-- **Fly spend cap** (set via dashboard) is the absolute ceiling.
+Fly does **not** offer a hard "stop at $X" spending cap — they offer **billing alerts** (email notifications) but those are warnings, not a brake. Real cost protection comes from these layers, in order of importance:
+
+1. **App-level limits (baked into the code).** These stop a runaway bill before it starts:
+   - HTTP rate limit: 120 req/min per IP (`express-rate-limit`).
+   - Socket.IO: 8 concurrent connections per IP, 15 events/sec per socket, 4 KB max payload.
+   - Cap of 500 rooms and 8 players per room.
+2. **Machine config.** `auto_stop_machines = "stop"` + `min_machines_running = 0` — VM sleeps when idle, $0 while sleeping. Single region, single `shared-cpu-1x` 256 MB, no autoscale.
+3. **Cloudflare in front** (free plan, optional but recommended). Absorbs DDoS bandwidth before it hits Fly's meter. This is where you save the most money during an attack.
+4. **Billing alerts.** Set alerts at $1 / $3 / $5 in the Fly dashboard (Billing → Spend Management) so you get an email if anything is off.
+5. **Manual kill switch** (see below). The actual "stop at $0" button is `fly scale count 0`, run by you.
 
 ## Kill switch
 
